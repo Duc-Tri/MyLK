@@ -19,7 +19,7 @@ Alternatively, you can drag and drop the directory where your extension files li
 
 6. The extension will start to collect data from your current tab, ONLY for wikipedia, dailymotion and youtube urls. The data is sent every 6 seconds.
 
-7. To see the results, open another browser (it can be another Chrome) and go to : https://mylk.formavisa.com/. This urls will refresh every 5 seconds.
+7. To see the results, open another browser (it can be another Chrome, but pay attention to the ACTIVE tab, which only will be processed by the extension) and go to : https://mylk.formavisa.com/. This url will refresh every 5 seconds.
 
 You can put both browsers side-by-side to see the changes in real time.
 
