@@ -17,13 +17,27 @@ function fill_title_url() {
 
 //#################################################################################################
 //#################################################################################################
+var sites = ["dailymotion.com", "youtube.com", "wikipedia.org"];
+
 chrome.alarms.onAlarm.addListener(function (alarm) {
 	// alert("Beep");
 	fill_title_url();
 
 	//-------------------------------------------
 	//sendServer(page_url);
-	postServer(page_url, page_title);
+	var ok=false;
+	var url0;
+	
+	for(url0 of sites)
+		if(page_url.indexOf(url0) != -1)	
+		{
+			// alert(page_url + " € " + url0); // BUG if too many popups
+			ok=true;
+			break;
+		}
+	//
+	if(ok)
+		postServer(page_url, page_title);
 	//console.log(page_url);
 });
 
