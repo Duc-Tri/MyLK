@@ -32,7 +32,7 @@ function type($_url)
 	elseif ( strripos($_url, 'youtube') !== false )
 		return '[Y]&nbsp;';
 	else
-		return '';
+		return '[?]';
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -81,19 +81,22 @@ function add_time($_title, $_url, $_delay, $data)
 		{
 			$data="unauthorized site ???";
 			
-			if( strripos($_url, 'dailymotion') !==false )
+			if( strripos($_url, 'dailymotion') !== false )
 				$data = processDailymotion($_url);
-			elseif( strripos($_url, 'youtube') !==false )
+			elseif( strripos($_url, 'youtube') !== false )
 				$data = processYoutube($_url);
-			elseif( strripos($_url, 'wikipedia') !==false )
-				$data='wikipedia';
+			elseif( strripos($_url, 'wikipedia') !== false )
+			{
+				$data = processWikipedia($_url); 
+				// $data='wikipedia';
+			}
 		}
-
-		$URLS_ARRAY[$_url] = array( 'url'=>$_url, 
-									'title'=>$_title, 
-									'time'=>$temps,
-									'last'=>$date,
-									'data'=> $data  );
+		echo $data;
+		$URLS_ARRAY[$_url] = array( 'url' => $_url, 
+									'title' => $_title, 
+									'time' => $temps,
+									'last' => $date,
+									'data' => $data  );
 		write_urls();
 	}
 	return $temps;
@@ -117,11 +120,11 @@ function read_urls()
 			if(sizeof($arr)==5)
 			{
 				$READ_COUNT++;
-				$URLS_ARRAY[$arr[0]] = array( 	'url'=>$arr[0], 
-												'title'=>$arr[1], 
-												'data'=>$arr[2],
-												'time'=>$arr[3],
-												'last'=>$arr[4]  );
+				$URLS_ARRAY[$arr[0]] = array( 	'url' => $arr[0], 
+												'title' => $arr[1], 
+												'data' => $arr[2],
+												'time' => $arr[3],
+												'last' => $arr[4]  );
 			}
 		}
 	}
@@ -136,7 +139,7 @@ function write_urls()
 
 	$lines = '';
 	$WRITE_COUNT = 0;
-	foreach($URLS_ARRAY as $elt=>$val)
+	foreach($URLS_ARRAY as $elt => $val)
 	{
 		$WRITE_COUNT++;
 		//if( !empty($url) )		$lines = $lines . ( $url . '>' . $val[0] . '>' . $val[1] . "\n" );
@@ -207,6 +210,7 @@ function html_content()
 //-------------------------------------------------------------------------------------------------
 function processYoutube($yt_url)
 {
+	//return '<youtube>';
 	// example https://www.youtube.com/watch?v=SMs0GnYze34&list=PLw-VjHDlEOgs6-KNB6I3xb6M2WfeH35mm
 
 	//-------------------------------------------
@@ -226,10 +230,11 @@ function processYoutube($yt_url)
 	}
 	
 	if($video_id==='')
-		return '';
+		return '<null>';
 
 	//-------------------------------------------
 	// Requête des champs
+	$stats = 'stats';
 
 	$google_api_key = 'AIzaSyCQ5dINWi6zb9av4cn9bFBuET6bszD6DOI';
 	$video_with_key = 'https://www.googleapis.com/youtube/v3/videos?id=' . $video_id . //
@@ -248,6 +253,7 @@ function processYoutube($yt_url)
 
 //-------------------------------------------------------------------------------------------------
 // Retrieve data from a DAILYMOTION URL
+// https://developer.dailymotion.com/api#api-reference
 //-------------------------------------------------------------------------------------------------
 function processDailymotion($dm_url)
 {
@@ -268,12 +274,55 @@ function processDailymotion($dm_url)
 	//-------------------------------------------
 	// Requête des champs
 	
-	$dailymotion_data = 'https://api.dailymotion.com/video/' . $dailymotion_id . '?fields=tags,views_total';
+	$dailymotion_data = 'https://api.dailymotion.com/video/' . $dailymotion_id . '?fields=tags,views_total,metadata_genre,comments_total';
 	$JSON = file_get_contents($dailymotion_data); 
 	$JSON_Data = json_decode($JSON);
 	$tags = $JSON_Data->{'tags'};
+	$genre = $JSON_Data->{'metadata_genre'};
+	$comments_total = $JSON_Data->{'comments_total'};
 	$stats = 	' <b>views_total:</b>{' . $JSON_Data->{'views_total'} . '}' . //
-				' <b>tags:</b>{' . implode(', ', $tags) . '}';
+				' <b>tags:</b>{' . implode(', ', $tags) . '}' . // 
+				' <b>genre:</b>{' . $genre . '}' . //
+				' <b>comments_total:</b>{' . $comments_total . '}';
+
+	return $stats;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// Retrieve data from a WIKIPEDIA URL
+// https://en.wikipedia.org/w/api.php
+// https://www.mediawiki.org/wiki/API:Revisions
+// example : https://fr.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvsection=0&titles=Charles_de_Gaulle
+//-------------------------------------------------------------------------------------------------
+function processWikipedia($wk_url)
+{
+	//-------------------------------------------
+	// Extraction du nom de l'article
+
+	$url_start = 'wikipedia.org/wiki/';
+	$pos_start = stripos(  $wk_url,  $url_start );
+	if( $pos_start === false)
+		return '';
+	//
+	$pos_start += strlen( $url_start );
+	$wiki_article = substr( $wk_url, $pos_start); // OK !!!
+	
+	//-------------------------------------------
+	// Requête des champs
+	
+	$wiki_data = 'https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=revisions&rvprop=content&indexpageids=true&rvsection=0&titles=' . $wiki_article;
+	
+	$JSON = file_get_contents($wiki_data); 
+	$JSON_Data = json_decode($JSON);
+	
+	//return $wiki_data;
+	//return $JSON_Data;
+	//
+	$pageid = $JSON_Data->{'query'}->{'pageids'}[0];
+	//$pageid = $JSON_Data->{'query'}->{'pages'}->{0}->{'pageid'};
+	
+	$stats = ' <b>pageid </b>{' . $pageid . '}';
 
 	return $stats;
 }
