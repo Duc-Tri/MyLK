@@ -53,7 +53,7 @@ function postServer(_url, _title) {
 	xhr.open('POST', postUrl, true);
 
 	var myParams = 'url=' + encodeURIComponent(_url) + //
-		'&title=' + _title + //
+		'&title=' + encodeURIComponent(_title) + //
 		'&time=' + seconds_period; //
 
 	// Set correct header for form data

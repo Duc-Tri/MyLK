@@ -12,7 +12,6 @@ function DOMtoString(document_root) {
 			node.outerHTML;
 
 			//--------------------------
-
 			var metas = document_root.getElementsByTagName('meta');
 			var trace = ">>>>>>>>>>";
 
@@ -25,7 +24,6 @@ function DOMtoString(document_root) {
 			}
 			console.log(trace);
 			//--------------------------
-
 
 			break;
 		case Node.TEXT_NODE:
@@ -51,21 +49,22 @@ function DOMtoString(document_root) {
 
 	//---------------------------------------------------------------------------------------------
 	//alert(" ===  ===  ===  = DOMtoString \ n " + html); // OK !!! works
-	//console.log(html);
+	console.log(html);
+	
 	//---------------------------------------------------------------------------------------------
 	var content01 = " ";
 	/*
 	var elt = document_root.getElementById('keywords');
 
 	content01 = elt.innerHTML + " ##  # ";
-	 */
+	*/
 	/*
 	var metaArray = document_root.getElementsByName('keywords');
 	for (var i = 0; i < metaArray.length; i++) {
 	//document.write(metaArray[i].content + '<br>');
 	content01 += metaArray[i].content + " # " + metaArray[i].innerHTML + " \ n ";
 	}
-	 */
+	*/
 
 	//alert(" ===  ===  ===  = DOMtoString \ n " + content01); // OK !!! works
 
